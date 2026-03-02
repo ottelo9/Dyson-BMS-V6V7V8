@@ -24,7 +24,58 @@ Cell voltage offsets in eeprom to account for inaccurate internal voltage measur
 - Some diagnostics are written to eeprom before sleep off charger
 
 ------
-Original readme of the Repo:  
+
+Instruction for cell voltage offsets in EEPROM
+This is mostly relevant for the cell imbalance indicator. From my experience the ISL has a systematic
+error of +-30 mV across the cells. When you balance your cells externally and your multimeter shows
+all cells to have exactly the same voltage you will likely find your battery pack to report an imbalance
+between 0 mV and 60mV although it is actually 0 mV. This is just part variance. The imbalance
+indicator will only be reliable for imbalance greater e.g. 100 mV. The step of determining an setting
+the voltage offsets is completely optional though.
+Procedure to correctly set the offset voltage offsets:
+1) Programm the PIC with the firmware
+2) Disconnect the battery pack from Pickit and let it idle until it goes to sleep. (This will write the
+currently measured cell voltages to EEPROM)
+3) Reconnect the battery pack to Pickit and use the Pickit programming tool to read the
+EEPROM.
+4) Compare the cell voltages saved to EEPROM to the voltages you measure with your
+multimeter
+5) Calculate the necessary voltage offsets and save them to the appropriate locations in the
+EEPROM. Keep in mind that the currently set voltage offsets are already applied in the
+reported cell voltages.
+6) Repeat the steps 2-5 until the reported voltages match the measured values +- 1 mV.
+The default values for the voltage offsets are +1 mV.  
+These values are written to EEPROM during programming (or manually) to the following locations:
+  
+0x48: offset voltage cell 1 / mV  
+0x49: offset voltage cell 2 / mV  
+0x4A: offset voltage cell 3 / mV  
+0x4B: offset voltage cell 4 / mV  
+0x4C: offset voltage cell 5 / mV  
+0x4D: offset voltage cell 6 / mV  
+  
+Note that the stored values are interpreted as signed 8 bit integers. Use a hex-decimal converter.  
+E.g. a value of 1A stored in the location 0x48 will result in an offset voltage of +26 mV for cell 1. A  
+value of E6 will give an offset of -26 mV.
+  
+The reported voltages by the battery pack are stored in the locations:  
+  
+0x38-0x39: voltage cell 1 / mV  
+0x3A-0x3B: voltage cell 2 / mV  
+0x3C-0x3D: voltage cell 3 / mV  
+0x3E-0x3F: voltage cell 4 / mV  
+0x40-0x41: voltage cell 5 / mV  
+0x42-0x43: voltage cell 6 / mV  
+  
+These values are unsigned 16 bit values and are represented via two subsequent 8 bit values. Use a hex-decimal converter.  
+E.g. a value of 0CCE stored in the location 0x38 and 0x39 will result in a reported cell voltage 1 of 3278 mV.
+  
+In the Pickit programming tool scroll down three lines to match this screenshot.  
+<img width="525" height="135" alt="image" src="https://github.com/user-attachments/assets/966d435d-8ce2-4760-b737-003247255c87" />
+
+------
+<details>
+<summary>Original readme of the Repo:</summary>
 
 **Dyson vacuum batteries are designed to fail.**
 
@@ -264,11 +315,5 @@ A: That's not a question. However, if we accept the line of thinking that Dyson 
 - DavidAlfa from EEVBlog Forum (Created I2C Library)
 - dvd4me from EEVBlog Forum (Helped with reverse engineering and provided continued support)
 -----
-Now, if you’ll excuse me, I’m going to finally vacuum my apartment.
 
-**In memory of BMS boards SV11 #1, SV09 #1, SV04 #1, and SV04 #3 who gave their lives for this project. Their sacrifice will not be in vain.**
-
-[^1]: https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF1206JT100R/1757426
-Cost in 5000 qty is $0.00371 each. 100R balance resistor = ~42mA balance discharge current with 176mW power dissipation.
-
-[^2]: This is a slight exaggeration. dvd4me on the EEVblog forums figured out which EEPROM values you can reset in order to un-brick the battery that way. https://www.eevblog.com/forum/reviews/dyson-v7-trigger-cordless-vacuum-teardown-of-battery-pack/msg4028665/#msg4028665
+</details>
