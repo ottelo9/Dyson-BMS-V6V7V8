@@ -32,15 +32,15 @@ typedef enum {
     __ISL_NUMBER_OF_REG
 } isl_reg_t;
 
-uint8_t ISL_RegData[__ISL_NUMBER_OF_REG] = {0};
+extern uint8_t ISL_RegData[__ISL_NUMBER_OF_REG];
 
-i2c_result_t I2C_ERROR_FLAGS = 0;
+extern i2c_result_t I2C_ERROR_FLAGS;
 
-volatile uint16_t CellVoltages[7] = {0}; //Array for cell voltages. We'll just ignore index 0 and use indexes 1-6 for cells 1-6
+extern volatile uint16_t CellVoltages[7]; //Array for cell voltages. We'll just ignore index 0 and use indexes 1-6 for cells 1-6
 
 #ifdef ENABLE_CELL_VOLTAGE_ROLLING_AVERAGE
-uint16_t CellVoltageHistory[CELLVOLTAGE_AVERAGE_WINDOW_SIZE][7] = {0};
-uint8_t OldestVoltageIndex = 0;
+extern uint16_t CellVoltageHistory[CELLVOLTAGE_AVERAGE_WINDOW_SIZE][7];
+extern uint8_t OldestVoltageIndex;
 #endif
 
 enum {
@@ -51,41 +51,41 @@ enum {
 
 typedef uint8_t isl_locate_t;
 
-const struct ISL_reg_bits_struct {  //Stores one array for each register setting in the format {register address, bit addr of LSB of value, bit length of value
+struct ISL_reg_bits_struct {  //Stores one array for each register setting in the format {register address, bit addr of LSB of value, bit length of value
     isl_locate_t WKUP_STATUS[3];    //0x00 Config Register
     isl_locate_t PRESENT[3];
-    
+
     isl_locate_t OC_CHARGE_STATUS[3];      //0x01 Operating Status Register
     isl_locate_t OC_DISCHARGE_STATUS[3];
     isl_locate_t SHORT_CIRCUIT_STATUS[3];
     isl_locate_t LOAD_FAIL_STATUS[3];
     isl_locate_t INT_OVER_TEMP_STATUS[3];
     isl_locate_t EXT_OVER_TEMP_STATUS[3];
-    
+
     isl_locate_t CELL_BALANCE_6bits[3]; //0x02 Cell Balance Registers
-    
+
     isl_locate_t ANALOG_OUT_SELECT_4bits[3];  //0x03 Analog Out Register
-    isl_locate_t USER_FLAG_0[3];   
+    isl_locate_t USER_FLAG_0[3];
     isl_locate_t USER_FLAG_1[3];
-            
+
     isl_locate_t ENABLE_DISCHARGE_FET[3];   //0x04 FET Control Register
     isl_locate_t ENABLE_CHARGE_FET[3];
     isl_locate_t VMON_CHECK[3];
     isl_locate_t SLEEP[3];
-            
-    isl_locate_t OC_DISCHARGE_TIMEOUT_2bits[3];   //0x05 Discharge Set Register   
+
+    isl_locate_t OC_DISCHARGE_TIMEOUT_2bits[3];   //0x05 Discharge Set Register
     isl_locate_t SC_DISCHARGE_THRESH_2bits[3];
     isl_locate_t SC_AUTO_DISABLE[3];
     isl_locate_t OC_DISCHARGE_THRESH_2bits[3];
     isl_locate_t OC_DISCHARGE_AUTO_DISABLE[3];
-            
+
     isl_locate_t OC_CHARGE_TIMEOUT_2bits[3];  //0x06 Charge Set Register
     isl_locate_t DISCHARGE_TIME_DIV[3];
     isl_locate_t CHARGE_TIME_DIV[3];
     isl_locate_t SC_DELAY_LONG[3];
     isl_locate_t OC_CHARGE_THRESH_2bits[3];
     isl_locate_t OC_CHARGE_AUTO_DISABLE[3];
-            
+
     isl_locate_t WKPOL[3];          //0x07 Feature Set Register
     isl_locate_t DISABLE_WKUP[3];
     isl_locate_t FORCE_POR[3];
@@ -94,62 +94,15 @@ const struct ISL_reg_bits_struct {  //Stores one array for each register setting
     isl_locate_t TEMP_3V_ON[3];
     isl_locate_t DISABLE_3V3_REG[3];
     isl_locate_t DISABLE_AUTO_TEMP_SCAN[3];
-            
+
     isl_locate_t USER_FLAG_2[3];   //0x08 Write Enable Register
     isl_locate_t USER_FLAG_3[3];
     isl_locate_t ENABLE_DISCHARGE_SET_WRITES[3];
     isl_locate_t ENABLE_CHARGE_SET_WRITES[3];
     isl_locate_t ENABLE_FEAT_SET_WRITES[3];
-} ISL = {
-    .WKUP_STATUS = {0x00, 4, 1},    //0x00 Config Register; Register 0x00, LSB bit 4, bit length 1
-    .PRESENT = {0x00, 5, 1},
-
-    .OC_CHARGE_STATUS = {0x01, 0, 1},      //0x01 Operating Status Register
-    .OC_DISCHARGE_STATUS = {0x01, 1, 1},
-    .SHORT_CIRCUIT_STATUS = {0x01, 2, 1},
-    .LOAD_FAIL_STATUS = {0x01, 3, 1},
-    .INT_OVER_TEMP_STATUS = {0x01, 4, 1},
-    .EXT_OVER_TEMP_STATUS = {0x01, 5, 1},
-
-    .CELL_BALANCE_6bits = {0x02, 1, 6}, //0x02 Cell Balance Registers; Register 0x02, LSB in position 1, bit length 6
-    
-    .ANALOG_OUT_SELECT_4bits = {0x03, 0, 4},  //0x03 Analog Out Register, value requires 4 bits
-    .USER_FLAG_0 = {0x03, 6, 1},   
-    .USER_FLAG_1 = {0x03, 7, 1},
-
-    .ENABLE_DISCHARGE_FET = {0x04, 0, 1},   //0x04 FET Control Register
-    .ENABLE_CHARGE_FET = {0x04, 1, 1},
-    .VMON_CHECK = {0x04, 6, 1},
-    .SLEEP = {0x04, 7, 1},
-
-    .OC_DISCHARGE_TIMEOUT_2bits = {0x05, 0, 2},   //0x05 Discharge Set Register, value requires 2 bits     
-    .SC_DISCHARGE_THRESH_2bits = {0x05, 2, 2},
-    .SC_AUTO_DISABLE = {0x05, 4, 1},
-    .OC_DISCHARGE_THRESH_2bits = {0x05, 5, 2},
-    .OC_DISCHARGE_AUTO_DISABLE = {0x05, 7, 1},
-
-    .OC_CHARGE_TIMEOUT_2bits = {0x06, 0, 2},  //0x06 Charge Set Register, value requires 2 bits
-    .DISCHARGE_TIME_DIV = {0x06, 2, 1},
-    .CHARGE_TIME_DIV = {0x06, 3, 1},
-    .SC_DELAY_LONG  = {0x06, 4, 1},
-    .OC_CHARGE_THRESH_2bits = {0x06, 5, 2},
-    .OC_CHARGE_AUTO_DISABLE = {0x06, 7, 1},
-
-    .WKPOL = {0x07, 0, 1},          //0x07 Feature Set Register
-    .DISABLE_WKUP = {0x07, 1, 1},
-    .FORCE_POR = {0x07, 2, 1},
-    .DISABLE_INT_THERMAL_SHUTDOWN = {0x07, 3, 1},
-    .DISABLE_EXT_THERMAL_SHUTDOWN = {0x07, 4, 1},
-    .TEMP_3V_ON = {0x07, 5, 1},
-    .DISABLE_3V3_REG = {0x07, 6, 1},
-    .DISABLE_AUTO_TEMP_SCAN = {0x07, 7, 1},
-
-    .USER_FLAG_2 = {0x08, 3, 1},   //0x08 Write Enable Register
-    .USER_FLAG_3 = {0x08, 4, 1},
-    .ENABLE_DISCHARGE_SET_WRITES = {0x08, 5, 1},
-    .ENABLE_CHARGE_SET_WRITES = {0x08, 6, 1},
-    .ENABLE_FEAT_SET_WRITES = {0x08, 7, 1},
 };
+
+extern const struct ISL_reg_bits_struct ISL;
 
 typedef enum {
     CB1 = 0b000001,
@@ -172,14 +125,15 @@ typedef enum {
     AO_INTTEMP =    0b1001,
 } isl_analogout_t;
 
-struct {
+struct cellstats_struct {
     uint8_t mincellnum;     //Cell number with the lowest voltage
     uint8_t maxcellnum;     //Cell number with the highest voltage
     uint16_t maxcell_mV;    //Voltage of highest voltage cell in mV
     uint16_t mincell_mV;    //Voltage of lowest voltage cell in mV
     uint16_t packdelta_mV;  //mV difference between high and lowest voltage cells
-    
-} cellstats;
+};
+
+extern struct cellstats_struct cellstats;
 
 void ISL_Init(void);
 uint8_t ISL_Read_Register(isl_reg_t reg);

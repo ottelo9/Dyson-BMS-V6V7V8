@@ -22,6 +22,46 @@
 #include "LED.h"
 #include "FaultHandling.h"
 
+// Variable definitions (declared extern in main.h)
+uint8_t state;
+detect_t detect = 0;
+uint8_t detect_history = 0;
+uint16_t adc_chrg_trig_detect_voltage_history[5];
+uint8_t pack_charge_wait_repeats_counter = 0;
+uint8_t enable_slow_charge = 0;
+modelnum_t modelnum;
+int16_t isl_int_temp;
+int16_t isl_int_temp_max = 0;
+uint8_t thermistor_temp;
+uint8_t thermistor_temp_max = 0;
+bool charge_complete_flag = false;
+bool full_discharge_flag = false;
+uint16_t discharge_current_mA = 0;
+uint16_t discharge_current_mA_last_trigger = 0;
+uint16_t discharge_current_mA_last_trigger_eeprom = 0;
+uint16_t mincell_voltage_mV_last_trigger = 0xFFFF;
+uint8_t minimum_cell_last_trigger = 0;
+uint32_t mincell_internal_resistence_last_charge_uOhms = 0;
+uint32_t mincell_internal_resistence_max = 0;
+uint16_t packdelta_end_of_charging_wait_mV = 0;
+uint16_t mincell_voltage_mV_last_trigger_eeprom = 0;
+uint16_t mincell_voltage_mV_last_trigger_recover_eeprom = 0;
+uint8_t I2C_error_counter = 0;
+int8_t cell_offset_voltage_1 = 0;
+int8_t cell_offset_voltage_2 = 0;
+int8_t cell_offset_voltage_3 = 0;
+int8_t cell_offset_voltage_4 = 0;
+int8_t cell_offset_voltage_5 = 0;
+int8_t cell_offset_voltage_6 = 0;
+counter_t charge_wait_counter = {0,0};
+counter_t sleep_timeout_counter = {0,0};
+counter_t nonblocking_wait_counter = {0,0};
+counter_t error_timeout_wait_counter = {0,0};
+big_counter_t charge_duration_counter = {0,0};
+counter_t LED_code_cycle_counter = {0,0};
+big_counter_t total_runtime_counter = {0,0};
+big_counter_t onetime_runtime_counter = {0,0};
+
 //EEPROM Init during programming
 __EEPROM_DATA(0x54, 0x69, 0x6E, 0x66, 0x65, 0x76, 0x65, 0x72);              //"Tinfever"    EEPROM addresses 0x00 - 0x07
 __EEPROM_DATA(0x20, 0x46, 0x55, 0x2D, 0x44, 0x79, 0x73, 0x6F);              //" FU-Dyso"    EEPROM addresses 0x08 - 0x0F
@@ -256,11 +296,11 @@ void sleep_ISL_or_PIC(void){
         Write32BitUintVariableToEEPROM(EEPROM_RUNTIME_TOTAL_STARTING_ADDR, total_runtime_counter.value);
         
         state = IDLE;    // in case ISL does somehow not go to sleep
-        ISL_SetSpecificBits(ISL.SLEEP, 1);   // only one sleep command to ISL is necessary because we do not let the ISL sleep while on charger. It is stated in the data sheet that ISL will only go to sleep in another changer of sleep bit if WKUP is pulled high. We don´t need this anymore
+        ISL_SetSpecificBits(ISL.SLEEP, 1);   // only one sleep command to ISL is necessary because we do not let the ISL sleep while on charger. It is stated in the data sheet that ISL will only go to sleep in another changer of sleep bit if WKUP is pulled high. We donï¿½t need this anymore
         __delay_ms(250);                    // ISL will kill PIC when it goes to sleep because it shuts down VCC. PIC will wakeup together with ISL in reset state. ISL wakes up when charger is connected or Trigger is pulled/released.
         ClearI2CBus(); //If the ISL didn't actually sleep when we just told it to, something is seriously wrong. The best we can do is to try to reset the ISL.
         ISL_Init();    //This includes a POR reset of the ISL
-        //this should leave the current draw at 2,5µA on cell 1 and 0,2µA on the other cells
+        //this should leave the current draw at 2,5ï¿½A on cell 1 and 0,2ï¿½A on the other cells
     }
 }
 

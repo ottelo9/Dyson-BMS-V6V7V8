@@ -17,6 +17,66 @@
 #include "FaultHandling.h"
 #include "main.h"
 
+// Variable definitions (declared extern in isl94208.h)
+uint8_t ISL_RegData[__ISL_NUMBER_OF_REG] = {0};
+i2c_result_t I2C_ERROR_FLAGS = 0;
+volatile uint16_t CellVoltages[7] = {0};
+#ifdef ENABLE_CELL_VOLTAGE_ROLLING_AVERAGE
+uint16_t CellVoltageHistory[CELLVOLTAGE_AVERAGE_WINDOW_SIZE][7] = {0};
+uint8_t OldestVoltageIndex = 0;
+#endif
+struct cellstats_struct cellstats;
+
+const struct ISL_reg_bits_struct ISL = {
+    .WKUP_STATUS = {0x00, 4, 1},    //0x00 Config Register; Register 0x00, LSB bit 4, bit length 1
+    .PRESENT = {0x00, 5, 1},
+
+    .OC_CHARGE_STATUS = {0x01, 0, 1},      //0x01 Operating Status Register
+    .OC_DISCHARGE_STATUS = {0x01, 1, 1},
+    .SHORT_CIRCUIT_STATUS = {0x01, 2, 1},
+    .LOAD_FAIL_STATUS = {0x01, 3, 1},
+    .INT_OVER_TEMP_STATUS = {0x01, 4, 1},
+    .EXT_OVER_TEMP_STATUS = {0x01, 5, 1},
+
+    .CELL_BALANCE_6bits = {0x02, 1, 6}, //0x02 Cell Balance Registers; Register 0x02, LSB in position 1, bit length 6
+
+    .ANALOG_OUT_SELECT_4bits = {0x03, 0, 4},  //0x03 Analog Out Register, value requires 4 bits
+    .USER_FLAG_0 = {0x03, 6, 1},
+    .USER_FLAG_1 = {0x03, 7, 1},
+
+    .ENABLE_DISCHARGE_FET = {0x04, 0, 1},   //0x04 FET Control Register
+    .ENABLE_CHARGE_FET = {0x04, 1, 1},
+    .VMON_CHECK = {0x04, 6, 1},
+    .SLEEP = {0x04, 7, 1},
+
+    .OC_DISCHARGE_TIMEOUT_2bits = {0x05, 0, 2},   //0x05 Discharge Set Register, value requires 2 bits
+    .SC_DISCHARGE_THRESH_2bits = {0x05, 2, 2},
+    .SC_AUTO_DISABLE = {0x05, 4, 1},
+    .OC_DISCHARGE_THRESH_2bits = {0x05, 5, 2},
+    .OC_DISCHARGE_AUTO_DISABLE = {0x05, 7, 1},
+
+    .OC_CHARGE_TIMEOUT_2bits = {0x06, 0, 2},  //0x06 Charge Set Register, value requires 2 bits
+    .DISCHARGE_TIME_DIV = {0x06, 2, 1},
+    .CHARGE_TIME_DIV = {0x06, 3, 1},
+    .SC_DELAY_LONG  = {0x06, 4, 1},
+    .OC_CHARGE_THRESH_2bits = {0x06, 5, 2},
+    .OC_CHARGE_AUTO_DISABLE = {0x06, 7, 1},
+
+    .WKPOL = {0x07, 0, 1},          //0x07 Feature Set Register
+    .DISABLE_WKUP = {0x07, 1, 1},
+    .FORCE_POR = {0x07, 2, 1},
+    .DISABLE_INT_THERMAL_SHUTDOWN = {0x07, 3, 1},
+    .DISABLE_EXT_THERMAL_SHUTDOWN = {0x07, 4, 1},
+    .TEMP_3V_ON = {0x07, 5, 1},
+    .DISABLE_3V3_REG = {0x07, 6, 1},
+    .DISABLE_AUTO_TEMP_SCAN = {0x07, 7, 1},
+
+    .USER_FLAG_2 = {0x08, 3, 1},   //0x08 Write Enable Register
+    .USER_FLAG_3 = {0x08, 4, 1},
+    .ENABLE_DISCHARGE_SET_WRITES = {0x08, 5, 1},
+    .ENABLE_CHARGE_SET_WRITES = {0x08, 6, 1},
+    .ENABLE_FEAT_SET_WRITES = {0x08, 7, 1},
+};
 
 //Private functions
 static uint8_t _GenerateMask(uint8_t length);
@@ -98,7 +158,7 @@ uint8_t ISL_GetSpecificBits_cached(const isl_locate_t params[3]){     //Can be u
 uint16_t ISL_GetAnalogOutmV(isl_analogout_t value){
     DAC_SetOutput(0);   //Make sure DAC is set to 0V
     ADC_SelectChannel(ADC_PIC_DAC); //Connect ADC to 0V to empty internal ADC sample/hold capacitor
-    __delay_us(1);  //Wait a little bit 1µs
+    __delay_us(1);  //Wait a little bit 1ï¿½s
     ADC_SelectChannel(ADC_ISL_OUT); //Connect ADC to analog out of ISL94208
     ISL_SetSpecificBits(ISL.ANALOG_OUT_SELECT_4bits, value);    //Set the ISL to output desired signal on analog out
     __delay_us(100); //ISL94208 has maximum analog output stabilization time of 0.1ms = 100us
