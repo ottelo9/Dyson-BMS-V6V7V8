@@ -21,16 +21,16 @@
 
 //Common Configuration Options////////////////////////////
 
-const uint8_t MAX_CHARGE_TEMP_C = 50;           //Celsius. MAX_DISCHARGE_TEMP_C must be greater than MAX_CHARGE_TEMP_C for it to work correctly.
-const uint8_t MAX_DISCHARGE_TEMP_C = 60;        //Celsius. 70C max per LG 18650 HD2C datasheet. 60C limit was hit when doing full current 20A discharge test. 70C limit was hit during 20A discharge test too. These things run hot. Vacuum running in max mode consumes ~17A. Need to do full discharge test with vacuum in max mode. Might reduce temp limit since 70C scares me.
-const uint8_t MIN_TEMP_C = 7; //Celsius. Charging and discharging will not work below this temperature. 7 degrees C is the lowest value in SV11 thermistor LUT. Must be > HYSTERESIS_TEMP_C to avoid potential overflow issues in getThermistorTemp.
-const uint16_t MAX_DISCHARGE_CURRENT_mA = 30000;        //Current limit for the PIC measurement of current through the output shunt. (DISCHARGE_OC_SHUNT_PICREAD)
-const uint16_t MIN_DISCHARGE_CELL_VOLTAGE_mV = 3000;    //The output will be disabled when the min cell voltage goes below this value. full_discharge_flag will be set.
-const uint16_t CRITICAL_MIN_CELL_VOLTAGE_mV = 2000;   // no charging if one cell is below.
-const uint16_t CELL_CUTOUT_VOLTAGE_DISCHARGE_mV = 2500; // no no cell is allowed to go below while under load
-const uint16_t MAX_CHARGE_CELL_VOLTAGE_mV = 4000;       //Charging will stop when max cell voltage goes above this value.
-const uint16_t PACK_CHARGE_NOT_COMPLETE_THRESH_mV = 3900;   //If the max cell voltage goes under this threshold while the charger is connected but idle, the charge_complete_flag will be cleared and charging will restart.
-const uint8_t PACK_CHARGE_MAX_NUM_OF_CHARGE_WAIT_REPEATS = 20; //Limit the Number of WaitCharge -> Charge repetations
+#define MAX_CHARGE_TEMP_C 50           //Celsius. MAX_DISCHARGE_TEMP_C must be greater than MAX_CHARGE_TEMP_C for it to work correctly.
+#define MAX_DISCHARGE_TEMP_C 60        //Celsius. 70C max per LG 18650 HD2C datasheet. 60C limit was hit when doing full current 20A discharge test. 70C limit was hit during 20A discharge test too. These things run hot. Vacuum running in max mode consumes ~17A. Need to do full discharge test with vacuum in max mode. Might reduce temp limit since 70C scares me.
+#define MIN_TEMP_C 7 //Celsius. Charging and discharging will not work below this temperature. 7 degrees C is the lowest value in SV11 thermistor LUT. Must be > HYSTERESIS_TEMP_C to avoid potential overflow issues in getThermistorTemp.
+#define MAX_DISCHARGE_CURRENT_mA 30000        //Current limit for the PIC measurement of current through the output shunt. (DISCHARGE_OC_SHUNT_PICREAD)
+#define MIN_DISCHARGE_CELL_VOLTAGE_mV 3000    //The output will be disabled when the min cell voltage goes below this value. full_discharge_flag will be set.
+#define CRITICAL_MIN_CELL_VOLTAGE_mV 2000   // no charging if one cell is below.
+#define CELL_CUTOUT_VOLTAGE_DISCHARGE_mV 2500 // no no cell is allowed to go below while under load
+#define MAX_CHARGE_CELL_VOLTAGE_mV 4000       //Charging will stop when max cell voltage goes above this value.
+#define PACK_CHARGE_NOT_COMPLETE_THRESH_mV 3900   //If the max cell voltage goes under this threshold while the charger is connected but idle, the charge_complete_flag will be cleared and charging will restart.
+#define PACK_CHARGE_MAX_NUM_OF_CHARGE_WAIT_REPEATS 20 //Limit the Number of WaitCharge -> Charge repetations
 
 
 /* Comment this line out to have the pack always stay awake while the charger is connected.
@@ -58,8 +58,8 @@ const uint8_t PACK_CHARGE_MAX_NUM_OF_CHARGE_WAIT_REPEATS = 20; //Limit the Numbe
 
 //EEPROM Formatting Parameters
 #define EEPROM_START_OF_EVENT_LOGS_ADDR 0x50
-const uint8_t EEPROM_NEXT_BYTE_AVAIL_STORAGE_ADDR = 0x19;
-const uint8_t EEPROM_RUNTIME_TOTAL_STARTING_ADDR = 0x1C;    //32-bit runtime counter to be held in 0x1C, 0x1D, 0x1E, 0x1F
+#define EEPROM_NEXT_BYTE_AVAIL_STORAGE_ADDR 0x19
+#define EEPROM_RUNTIME_TOTAL_STARTING_ADDR 0x1C    //32-bit runtime counter to be held in 0x1C, 0x1D, 0x1E, 0x1F
 
 #define redLED PSTR1CONbits.STR1C
 #define greenLED PSTR1CONbits.STR1A
@@ -85,37 +85,37 @@ const uint8_t EEPROM_RUNTIME_TOTAL_STARTING_ADDR = 0x1C;    //32-bit runtime cou
 #define ADC_CHRG_TRIG_DETECT 0x07
 #define ADC_SV09CHECK 0x0A
 
-const uint16_t VREF_VOLTAGE_mV = 2500;
+#define VREF_VOLTAGE_mV 2500
 
-const uint16_t DETECT_CHARGER_THRESH_mV = 1500;
-const uint16_t DETECT_TRIGGER_THRESH_mV = 200;
+#define DETECT_CHARGER_THRESH_mV 1500
+#define DETECT_TRIGGER_THRESH_mV 200
 
-const uint8_t HYSTERESIS_TEMP_C = 3;
+#define HYSTERESIS_TEMP_C 3
 
 /* Mark charge complete if a charging cycle takes less than this amount of time.
 313 * 32ms = 10.016s, if it took less than 10 seconds for max cell voltage to be > 4.20v, mark charge complete */
-const uint16_t CHARGE_COMPELTE_TIMEOUT = 313;   
+#define CHARGE_COMPELTE_TIMEOUT 313
 
 
 /* Length of time to wait between charge cycles
  2188 * 32ms = 70.016 seconds*/
-const uint16_t CHARGE_WAIT_TIMEOUT = 2188;
+#define CHARGE_WAIT_TIMEOUT 2188
 
 /* Length of time to wait while idle before going to sleep
   938*32ms = 30.016s */
-const uint16_t IDLE_SLEEP_TIMEOUT = 938;
+#define IDLE_SLEEP_TIMEOUT 938
 
 /* Length of time to wait while in an error state before going to sleep
  1876*32ms = 60.032s */
-const uint16_t ERROR_SLEEP_TIMEOUT = 1876;
+#define ERROR_SLEEP_TIMEOUT 1876
 
 /* Length of time there must be no errors before exiting error state
  94 * 32ms = 3.008s */
-const uint8_t ERROR_EXIT_TIMEOUT = 94;
+#define ERROR_EXIT_TIMEOUT 94
 
 /* Number of times the LED error code will be presented after the fault is cleared and trigger/charger removed.
  Ensures the error code won't immediately go away once the user stops pulling the trigger.*/
-const uint8_t NUM_OF_LED_CODES_AFTER_FAULT_CLEAR = 3;
+#define NUM_OF_LED_CODES_AFTER_FAULT_CLEAR 3
 
 /* Comment this line out to disable the cell voltage rolling average */
 #define ENABLE_CELL_VOLTAGE_ROLLING_AVERAGE
@@ -123,7 +123,7 @@ const uint8_t NUM_OF_LED_CODES_AFTER_FAULT_CLEAR = 3;
 /* Number of samples to include in the cell voltage rolling averaging*/
 #define CELLVOLTAGE_AVERAGE_WINDOW_SIZE 15 // max. 15 otherwise risk of overflow and wrong voltage readings
 
-const uint8_t CRITICAL_I2C_ERROR_THRESH = 2;    //If there are 2 consecutive I2C error results, even after attempting to recover, set flag for critical I2C error, show blink code, and then RESET.
+#define CRITICAL_I2C_ERROR_THRESH 2    //If there are 2 consecutive I2C error results, even after attempting to recover, set flag for critical I2C error, show blink code, and then RESET.
 
 
 
