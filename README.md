@@ -1,10 +1,30 @@
 
   
 # FW-Dyson-BMS
-### An (Unofficial) Firmware Upgrade for Dyson V6/V7 Vacuum Battery Management System (BMS)
+### An (Unofficial) Firmware Upgrade for Dyson V6/V7 and V8 Vacuum Battery Management System (BMS)
 ![Github Header Image](https://user-images.githubusercontent.com/46428760/168486653-8b8b696d-0bcb-4679-95c9-0377f26ec008.jpg)
+<img width="300" height="266" alt="image" src="https://github.com/user-attachments/assets/5a801079-b35a-4849-b965-89314e200e6a" />
+
 
 ------
+This is a fork of the excellent [FW Dyson BMS Firmware Repo](https://github.com/tinfever/FW-Dyson-BMS) but V2 with few anhancements and V8 support from [here](https://github.com/tinfever/FW-Dyson-BMS/issues/76):
+
+- Resolved the excessive draw on cell 1 when left on charger. If left on charger only the PIC is put to sleep after full charge. Result is an even current draw on all cells, approx 1,2mA. The ISL and the PIC will fully go to sleep if not left on the charger, drawing less than 3µA on cell 1 and less than 1µA on the other cells. Previously when left on the charger the ISL and PIC would go to sleep while wake up signal would be high on the ISL. Cell 1 would draw about 400µA more than the other cells which would lead to an imbalance over time.
+- Resolved the reported ghost triggering
+- Introduced correct LEDs for V8 battery (separate version)
+Cell voltage offsets in eeprom to account for inaccurate internal voltage measurement of the ISL (separate instruction for this in the files)
+- Set maximum charge voltage to 4,0V to enhance battery life because the battery lives 95% of the time fully charged.
+- Determine and factor in internal resistance of the cells to better utilise high currents (momentary voltage is allowed to drop below 3V while discharged)
+- Limit number of charge-wait-cycles (safety)
+- Introduced slow (10s charge, 70s wait) charging for cell voltage below 3V
+- Refuse charging if one cell is below 2,0V (unsafe, will generate 20 blink error)
+- Improve cell voltage indicator to work correctly if max charge voltage is set < 4,2V
+- Improve cell balance indicator (more consistent)
+- Increased short circuit discharge voltage threshold by one step (otherwise it would trip with fresh high current cells)
+- Some diagnostics are written to eeprom before sleep off charger
+
+------
+Original readme of the Repo:  
 
 **Dyson vacuum batteries are designed to fail.**
 
@@ -39,6 +59,9 @@ https://www.youtube.com/watch?v=dwyA5rBjncg
 -   You don’t like feeling like a cash cow being squeezed for all you’re worth.
     
 ## Compatible vacuums/batteries:
+- Dyson V8 - Model SV25 - PCB
+<img src="./hardware-info/images/V8 SV25 - PCB 233725.jpg" width="400" />
+
 -   Dyson V7 - Model SV11 - PCB 279857 - Compatible + Tested
 <img src="./hardware-info/images/V7 SV11 - PCB 279857.jpg" width="400" />
 
