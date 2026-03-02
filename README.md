@@ -7,7 +7,7 @@
 
 
 ------
-This is a fork of the excellent [FW Dyson BMS Firmware Repo](https://github.com/tinfever/FW-Dyson-BMS) but V2 with few anhancements and V8 support from [here](https://github.com/tinfever/FW-Dyson-BMS/issues/76):
+This is a fork of the excellent [FW Dyson BMS Firmware Repo](https://github.com/tinfever/FW-Dyson-BMS) but V2 with few anhancements and V8 support from [here](https://github.com/tinfever/FW-Dyson-BMS/issues/76). I have summarised and uploaded the changes here on this repository for all. Feel free to optimize this code.  
 
 - Resolved the excessive draw on cell 1 when left on charger. If left on charger only the PIC is put to sleep after full charge. Result is an even current draw on all cells, approx 1,2mA. The ISL and the PIC will fully go to sleep if not left on the charger, drawing less than 3µA on cell 1 and less than 1µA on the other cells. Previously when left on the charger the ISL and PIC would go to sleep while wake up signal would be high on the ISL. Cell 1 would draw about 400µA more than the other cells which would lead to an imbalance over time.
 - Resolved the reported ghost triggering
