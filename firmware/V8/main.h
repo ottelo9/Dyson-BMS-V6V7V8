@@ -27,7 +27,8 @@ enum {
     CELL_BALANCE,
     OUTPUT_EN,
     ERROR,
-} state;
+};
+extern uint8_t state;
 
 typedef enum{
     NONE = 0,       //0b00
@@ -35,53 +36,47 @@ typedef enum{
     CHARGER = 2     //0b10
 } detect_t;
 
-detect_t detect = 0;
-//#define DETECT_HISTORY_SIZE 4
-//detect_t detect_history[DETECT_HISTORY_SIZE] = 0;
-//uint8_t oldest_detect_index = 0;
+extern detect_t detect;
 
-uint8_t detect_history = 0; //Bits 0-1 = position 0; Bits 2-3 = position 1; Bits 4-5 = position 2; Bits 6-7 = position 3
+extern uint8_t detect_history; //Bits 0-1 = position 0; Bits 2-3 = position 1; Bits 4-5 = position 2; Bits 6-7 = position 3
 
-uint16_t adc_chrg_trig_detect_voltage_history[5];
+extern uint16_t adc_chrg_trig_detect_voltage_history[5];
 
-uint8_t pack_charge_wait_repeats_counter = 0; // Counter for WaitCharge -> Charge repetations
+extern uint8_t pack_charge_wait_repeats_counter; // Counter for WaitCharge -> Charge repetations
 
-uint8_t enable_slow_charge = 0; // for slow charging if mincell voltage below 3000mV but no Error 
+extern uint8_t enable_slow_charge; // for slow charging if mincell voltage below 3000mV but no Error
 
 typedef enum {
     SV09 = 0,
     SV11 = 1,
     NUM_OF_MODELS,
 } modelnum_t;
-modelnum_t modelnum;
+extern modelnum_t modelnum;
 
-int16_t isl_int_temp;
-int16_t isl_int_temp_max = 0;
-uint8_t thermistor_temp;
-uint8_t thermistor_temp_max = 0;
-bool charge_complete_flag = false;
-bool full_discharge_flag = false;
-uint16_t discharge_current_mA = 0;
-uint16_t discharge_current_mA_last_trigger = 0;  //last discharge current while on trigger to calculate internal resistance
-uint16_t discharge_current_mA_last_trigger_eeprom = 0; //record for eeprom discharge current for highest internal resistence
-uint16_t mincell_voltage_mV_last_trigger = 0xFFFF;  //last discharge mincell voltage while on trigger to calculate internal resistance
-uint8_t minimum_cell_last_trigger = 0; // record which wass the cell with the miniumum voltage when last output was enabled
-uint32_t mincell_internal_resistence_last_charge_uOhms = 0;  //will be calculated from difference in voltage mincell between when trigger last pulled to charge start
-uint32_t mincell_internal_resistence_max = 0; //record highest recorded internal resistence
-uint8_t led_charge_indicator = 0; //to control the thee blue LEDs indicating charge state 0b111 = full charge, 0b100 = low charge
-uint16_t packdelta_end_of_charging_wait_mV = 0;
-uint16_t mincell_voltage_mV_last_trigger_eeprom = 0;
-uint16_t mincell_voltage_mV_last_trigger_recover_eeprom = 0;
-uint8_t I2C_error_counter = 0;
-int8_t cell_offset_voltage_1 = 0;
-int8_t cell_offset_voltage_2 = 0;
-int8_t cell_offset_voltage_3 = 0;
-int8_t cell_offset_voltage_4 = 0;
-int8_t cell_offset_voltage_5 = 0;
-int8_t cell_offset_voltage_6 = 0;
-
-
-   
+extern int16_t isl_int_temp;
+extern int16_t isl_int_temp_max;
+extern uint8_t thermistor_temp;
+extern uint8_t thermistor_temp_max;
+extern bool charge_complete_flag;
+extern bool full_discharge_flag;
+extern uint16_t discharge_current_mA;
+extern uint16_t discharge_current_mA_last_trigger;
+extern uint16_t discharge_current_mA_last_trigger_eeprom;
+extern uint16_t mincell_voltage_mV_last_trigger;
+extern uint8_t minimum_cell_last_trigger;
+extern uint32_t mincell_internal_resistence_last_charge_uOhms;
+extern uint32_t mincell_internal_resistence_max;
+extern uint8_t led_charge_indicator;
+extern uint16_t packdelta_end_of_charging_wait_mV;
+extern uint16_t mincell_voltage_mV_last_trigger_eeprom;
+extern uint16_t mincell_voltage_mV_last_trigger_recover_eeprom;
+extern uint8_t I2C_error_counter;
+extern int8_t cell_offset_voltage_1;
+extern int8_t cell_offset_voltage_2;
+extern int8_t cell_offset_voltage_3;
+extern int8_t cell_offset_voltage_4;
+extern int8_t cell_offset_voltage_5;
+extern int8_t cell_offset_voltage_6;
 
 typedef struct {
     uint16_t value;
@@ -93,14 +88,14 @@ typedef struct {
     bool enable;
 } big_counter_t;
 
-counter_t charge_wait_counter = {0,0};
-counter_t sleep_timeout_counter = {0,0};
-counter_t nonblocking_wait_counter = {0,0};
-counter_t error_timeout_wait_counter = {0,0};
-big_counter_t charge_duration_counter = {0,0};
-counter_t LED_code_cycle_counter = {0,0};
-big_counter_t total_runtime_counter = {0,0};
-big_counter_t onetime_runtime_counter = {0,0};
+extern counter_t charge_wait_counter;
+extern counter_t sleep_timeout_counter;
+extern counter_t nonblocking_wait_counter;
+extern counter_t error_timeout_wait_counter;
+extern big_counter_t charge_duration_counter;
+extern counter_t LED_code_cycle_counter;
+extern big_counter_t total_runtime_counter;
+extern big_counter_t onetime_runtime_counter;
 
 detect_t GetDetectHistory(uint8_t position);
 bool CheckStateInDetectHistory(detect_t detect_val);

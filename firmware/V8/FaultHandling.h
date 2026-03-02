@@ -40,8 +40,8 @@ typedef struct {
 
 /*//It's called past error reason because by the time you read its data,
  *  the data will be the reason in the past for the error, regardless of the current state */
-volatile error_reason_t past_error_reason = {0};          
-volatile error_reason_t current_error_reason = {0};
+extern volatile error_reason_t past_error_reason;
+extern volatile error_reason_t current_error_reason;
 
 bool safetyChecks (void);
 bool minCellOK(void);

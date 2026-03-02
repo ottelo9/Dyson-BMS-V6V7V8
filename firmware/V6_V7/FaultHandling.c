@@ -17,6 +17,9 @@
 #include "config.h"
 #include "isl94208.h"
 
+// Variable definitions (declared extern in FaultHandling.h)
+volatile error_reason_t past_error_reason = {0};
+volatile error_reason_t current_error_reason = {0};
 
 bool safetyChecks (void){
     bool result = true;
